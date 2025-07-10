@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block title %}Ayuda{% endblock %}
+
+{% block content %}
+  <h2>Guía de uso del Dashboard</h2>
+
+  {% if rol == "jefe_departamento" %}
+    <h4>Panel de Jefe de Departamento</h4>
+    <ol>
+      <li><strong>Analítica</strong>: revisa métricas y nube de palabras de tu área.</li>
+      <li><strong>Manejar Reclamos</strong>: cambia el estado de los reclamos (pendiente, en proceso, resuelto, inválido).</li>
+      <li><strong>Salir</strong>: cierra sesión y vuelve al login.</li>
+    </ol>
+  {% elif rol == "secretario_tecnico" %}
+    <h4>Panel de Secretaría Técnica</h4>
+    <ol>
+      <li><strong>Analítica Global</strong>: estadísticas y nube de palabras de todos los reclamos.</li>
+      <li><strong>Manejar Reclamos</strong>: cambia estado y deriva reclamos a otros departamentos.</li>
+      <li><strong>Salir</strong>: cierra sesión.</li>
+    </ol>
+  {% endif %}
+
+  <p>Si tienes dudas adicionales, contacta al soporte técnico.</p>
+{% endblock %}

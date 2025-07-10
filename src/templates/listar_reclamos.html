@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Listar Reclamos{% endblock %}
+{% block content %}
+  <h2>Reclamos Pendientes</h2>
+  <form method="get" class="mb-3">
+    <div class="input-group w-50">
+      <input
+        type="text"
+        name="departamento"
+        class="form-control"
+        placeholder="Filtrar por departamento"
+        value="{{ request.args.get('departamento','') }}"
+      >
+      <button class="btn btn-outline-secondary">Filtrar</button>
+    </div>
+  </form>
+  <ul class="list-group">
+    {% for r in reclamos %}
+      <li class="list-group-item">
+        <strong>#{{ r.id_reclamo }}</strong> — {{ r.contenido }}<br>
+        <small>
+          Depto: {{ r.departamento.nombre }} |
+          Adherentes: {{ r.adherentes|length }} |
+          Fecha: {{ r.timestamp.strftime('%d/%m/%Y %H:%M') }}
+        </small>
+        <form method="post" action="{{ url_for('adherir') }}" class="mt-2">
+          <input type="hidden" name="id" value="{{ r.id_reclamo }}">
+          <button class="btn btn-sm btn-primary">Adherirse</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

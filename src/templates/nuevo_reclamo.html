@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %}Nuevo Reclamo{% endblock %}
+{% block content %}
+  <h2>Crear Reclamo</h2>
+  <form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="departamento" class="form-label">Departamento</label>
+      <input type="text" id="departamento" name="departamento" class="form-control" required 
+          placeholder="Nombre del departamento">
+    </div>
+    <div class="mb-3">
+      <label for="contenido" class="form-label">Descripción</label>
+      <textarea id="contenido" name="contenido" class="form-control" rows="4" required
+             placeholder="Describe el problema en detalle"></textarea>
+    </div>
+     </div>
+   <div class="mb-3">
+     <label for="foto" class="form-label">Adjuntar foto (opcional)</label>
+     <input type="file" id="foto" name="foto" class="form-control" accept="image/*">
+   </div>
+    <button type="submit" class="btn btn-primary">Enviar Reclamo</button>
+  </form>
+{% endblock %}

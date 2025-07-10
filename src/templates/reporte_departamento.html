@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}Reporte Departamento {{ depto.nombre }}{% endblock %}
+{% block content %}
+  <h2>Reporte de Reclamos — {{ depto.nombre }}</h2>
+
+  <h4>Estadísticas por estado</h4>
+  <ul class="list-group mb-4">
+    {% for estado, cant in estadisticas.items() %}
+      <li class="list-group-item d-flex justify-content-between">
+        {{ estado.replace('_',' ')|capitalize }}
+        <span class="badge bg-primary">{{ cant }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h4>Reclamos pendientes</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th><th>Usuario</th><th>Contenido</th><th>Fecha</th><th>Estado</th><th>Adherentes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reclamos %}
+      <tr>
+        <td>{{ r.id_reclamo }}</td>
+        <td>{{ r.creador.username }}</td>
+        <td>{{ r.contenido }}</td>
+        <td>{{ r.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>{{ r.estado.replace('_',' ') }}</td>
+        <td>{{ r.adherentes|length }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

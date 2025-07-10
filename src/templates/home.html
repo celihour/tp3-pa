@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block title %}Inicio{% endblock %}
+{% block content %}
+  <h2>Bienvenido, {{ username }}!</h2>
+
+  {% if rol == "usuario_final" %}
+    <div class="mt-4">
+      <a href="{{ url_for('nuevo_reclamo') }}" class="btn btn-primary me-2">🆕 Nuevo Reclamo</a>
+      <a href="{{ url_for('listar_reclamos') }}" class="btn btn-secondary">📋 Ver Reclamos</a>
+    </div>
+
+  {% elif rol == "jefe_departamento" %}
+    <div class="mt-4">
+      <a href="{{ url_for('dashboard_departamento') }}" class="btn btn-primary">📊 Mi Dashboard</a>
+    </div>
+
+  {% elif rol == "secretario_tecnico" %}
+    <div class="mt-4">
+      <a href="{{ url_for('dashboard_tecnico') }}" class="btn btn-primary">📊 Dashboard Técnico</a>
+    </div>
+  {% endif %}
+{% endblock %}

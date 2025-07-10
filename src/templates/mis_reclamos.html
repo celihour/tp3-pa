@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Mis Reclamos{% endblock %}
+{% block content %}
+  <h2>Mis Reclamos</h2>
+  <ul class="list-group">
+    {% for r in reclamos %}
+      <li class="list-group-item">
+        <strong>#{{ r.id_reclamo }}</strong> – {{ r.contenido }}
+        <br>
+        <small>
+          Estado: {{ r.estado.replace('_',' ') }} |
+          Fecha: {{ r.timestamp.strftime('%d/%m/%Y %H:%M') }} |
+          Depto: {{ r.departamento.nombre }}
+        </small>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

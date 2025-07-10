@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard Departamento{% endblock %}
+{% block content %}
+  <h2>Dashboard de {{ depto }}</h2>
+
+  <h4>Estadísticas de Reclamos</h4>
+  <canvas id="pieChart" width="400" height="400"></canvas>
+
+  <h4>Top Palabras</h4>
+  <ul class="list-group mb-4">
+    {% for word, count in top_pal %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ word }}
+        <span class="badge bg-primary rounded-pill">{{ count }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h4>Reclamos Pendientes</h4>
+  <ul class="list-group">
+    {% for r in reclamos %}
+      <li class="list-group-item">
+        <strong>#{{ r.id_reclamo }}</strong> — {{ r.contenido }}<br>
+        <small>Estado: {{ r.estado }} | Fecha: {{ r.timestamp.strftime('%d/%m/%Y %H:%M') }}</small>
+        <form method="post" action="{{ url_for('cambiar_estado') }}" class="mt-2">
+          <input type="hidden" name="id" value="{{ r.id_reclamo }}">
+          <select name="nuevo_estado" class="form-select d-inline-block w-auto">
+            {% for st in ['pendiente','en_proceso','resuelto','invalido'] %}
+              <option value="{{st}}" {% if st == r.estado %}selected{% endif %}>{{ st.replace('_',' ') }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-sm btn-success">Actualizar</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

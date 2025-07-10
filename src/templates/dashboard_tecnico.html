@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard Técnico{% endblock %}
+{% block content %}
+  <div class="d-flex justify-content-between mb-3">
+  <h2>Dashboard Técnico General</h2>
+  
+  <a href="{{ url_for('reporte_tecnico') }}"
+   class="btn btn-outline-success mb-3">
+  Descargar Reporte Global HTML
+</a>
+
+
+  <div>
+      <a href="{{ url_for('ayuda') }}" class="btn btn-warning me-2">❓ Ayuda</a>
+      <a href="{{ url_for('logout') }}" class="btn btn-secondary">🔒 Salir</a>
+    </div>
+  </div>
+
+  <h4>Estadísticas Globales</h4>
+  <ul class="list-group mb-4">
+    {% for estado, cant in estadisticas.items() %}
+      <li class="list-group-item d-flex justify-content-between">
+        {{ estado.replace('_',' ')|capitalize }}
+        <span class="badge bg-primary">{{ cant }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <h4>Top palabras (global)</h4>
+<!-- 1) Metemos el JSON “a mano” en un atributo data-words -->
+<div
+  id="word-cloud-global"
+  style="width:100%; height:300px; border:1px solid #ddd;"
+  data-words='[
+    {% for palabra, conteo in top_pal %}
+      ["{{ palabra|escapejs }}", {{ conteo }}]{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]'
+></div>
+
+<!-- 2) Ahora tu JS está “limpio”, sin Jinja dentro -->
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", () => {
+    const cont = document.getElementById("word-cloud-global");
+    // parseamos el JSON que generamos en data-words
+    const wordsGlobal = JSON.parse(cont.getAttribute("data-words"));
+    console.log("Nube de palabras:", wordsGlobal);
+    WordCloud(cont, {
+      list: wordsGlobal,
+      gridSize: Math.round(16 * cont.offsetWidth / 1024),
+      weightFactor: size => Math.pow(size,1.1)*5,
+      fontFamily: "Helvetica, Arial, sans-serif",
+      color: "random-dark",
+      rotateRatio: 0.1,
+      backgroundColor: "#f8f9fa"
+    });
+  });
+</script>
+
+
+
+  <h4>Reclamos pendientes</h4>
+  <ul class="list-group">
+    {% for r in reclamos_pendientes %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>#{{ r.id_reclamo }}</strong> – {{ r.contenido }}
+          <br>
+          <small class="text-muted">
+            Depto actual: {{ r.departamento.nombre }} |
+            Fecha: {{ r.timestamp.strftime('%d/%m/%Y %H:%M') }}
+          </small>
+        </div>
+
+        <!-- Formulario de derivación -->
+        <form method="post" action="{{ url_for('derivar_reclamo') }}" class="d-flex">
+          <input type="hidden" name="reclamo_id" value="{{ r.id_reclamo }}">
+
+          <select name="departamento_destino" class="form-select me-2" required>
+            {% for dept in departamentos %}
+              <option value="{{ dept.nombre }}"
+                {% if dept.nombre == r.departamento.nombre %}disabled{% endif %}>
+                {{ dept.nombre }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <button type="submit" class="btn btn-sm btn-outline-primary">
+            Derivar
+          </button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+
+{% endblock %}
