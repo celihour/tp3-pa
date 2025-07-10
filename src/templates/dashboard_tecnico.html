@@ -9,7 +9,6 @@
   Descargar Reporte Global HTML
 </a>
 
-
   <div>
       <a href="{{ url_for('ayuda') }}" class="btn btn-warning me-2">❓ Ayuda</a>
       <a href="{{ url_for('logout') }}" class="btn btn-secondary">🔒 Salir</a>
@@ -27,7 +26,6 @@
   </ul>
 
   <h4>Top palabras (global)</h4>
-<!-- 1) Metemos el JSON “a mano” en un atributo data-words -->
 <div
   id="word-cloud-global"
   style="width:100%; height:300px; border:1px solid #ddd;"
@@ -37,8 +35,6 @@
     {% endfor %}
   ]'
 ></div>
-
-<!-- 2) Ahora tu JS está “limpio”, sin Jinja dentro -->
 <script type="text/javascript">
   document.addEventListener("DOMContentLoaded", () => {
     const cont = document.getElementById("word-cloud-global");
@@ -57,8 +53,6 @@
   });
 </script>
 
-
-
   <h4>Reclamos pendientes</h4>
   <ul class="list-group">
     {% for r in reclamos_pendientes %}
@@ -71,11 +65,9 @@
             Fecha: {{ r.timestamp.strftime('%d/%m/%Y %H:%M') }}
           </small>
         </div>
-
-        <!-- Formulario de derivación -->
         <form method="post" action="{{ url_for('derivar_reclamo') }}" class="d-flex">
           <input type="hidden" name="reclamo_id" value="{{ r.id_reclamo }}">
-
+          
           <select name="departamento_destino" class="form-select me-2" required>
             {% for dept in departamentos %}
               <option value="{{ dept.nombre }}"

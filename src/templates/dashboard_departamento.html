@@ -25,7 +25,6 @@
   </ul>
 
  <h4>Top palabras (global)</h4>
-<!-- 1) Metemos el JSON “a mano” en un atributo data-words -->
 <div
   id="word-cloud-global"
   style="width:100%; height:300px; border:1px solid #ddd;"
@@ -36,11 +35,9 @@
   ]'
 ></div>
 
-<!-- 2) Ahora tu JS está “limpio”, sin Jinja dentro -->
 <script type="text/javascript">
   document.addEventListener("DOMContentLoaded", () => {
     const cont = document.getElementById("word-cloud-global");
-    // parseamos el JSON que generamos en data-words
     const wordsGlobal = JSON.parse(cont.getAttribute("data-words"));
     console.log("Nube de palabras:", wordsGlobal);
     WordCloud(cont, {

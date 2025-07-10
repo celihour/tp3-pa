@@ -6,10 +6,8 @@ from werkzeug.utils import secure_filename
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 if THIS_DIR not in sys.path:
     sys.path.insert(0, THIS_DIR)
-
 PROJECT_ROOT = os.path.dirname(THIS_DIR)
 TEMPLATES_DIR = os.path.join(PROJECT_ROOT, "templates")
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -34,10 +32,7 @@ def index():
 
 @app.route("/login", methods=["POST"])
 def login():
-    usuario = gu.login(
-        username=request.form.get("username"), # type: ignore
-        contraseña=request.form.get("password") # type: ignore
-    )
+    usuario = gu.login(username=request.form.get("username"), contraseña=request.form.get("password") ) # type: ignore
     if usuario:
         session["user_id"]  = usuario.id_usuario
         session["username"] = usuario.username
@@ -54,16 +49,7 @@ def login():
 def registro():
     if request.method == "POST":
         try:
-            usuario = gu.registrar_usuario(
-                nombre=request.form.get("nombre"), # type: ignore
-                apellido=request.form.get("apellido"), # type: ignore
-                email=request.form.get("email"), # type: ignore
-                username=request.form.get("username"), # type: ignore
-                contraseña=request.form.get("password"), # type: ignore
-                contraseña_repetida=request.form.get("password2"), # type: ignore
-                rol="usuario_final"
-            )
-            
+            usuario = gu.registrar_usuario(nombre=request.form.get("nombre"), apellido=request.form.get("apellido"), email=request.form.get("email"), username=request.form.get("username"), contraseña=request.form.get("password"), contraseña_repetida=request.form.get("password2"), rol="usuario_final") # type: ignore
         except ValueError as e:
             flash(str(e), "danger")
     return render_template("registro.html")
@@ -91,7 +77,6 @@ def nuevo_reclamo():
         return redirect(url_for("listar_reclamos"))
     return render_template("nuevo_reclamo.html")
 
-# Listar reclamos pendientes
 @app.route("/reclamos", methods=["GET"])
 def listar_reclamos():
     if not session.get("username"):
@@ -102,46 +87,31 @@ def listar_reclamos():
 
 @app.route("/dashboard_departamento", methods=["GET"])
 def dashboard_departamento():
-    # Si no está logueado o no es jefe, lo expulsamos
     if session.get("rol") != "jefe_departamento":
         flash("Acceso no autorizado", "danger")
         return redirect(url_for("index"))
-
     depto_nombre = session["departamento_nombre"]
     estadisticas = gr.estadisticas_por_departamento(depto_nombre)
     pendientes   = gr.listar_pendientes(depto_nombre)
     top_pal  = gr.top_palabras(limit=15, departamento_id=session["departamento_id"]) # type: ignore
-    
-
-    return render_template(
-        "dashboard_departamento.html",
-        depto=depto_nombre,
-        estadisticas=estadisticas,
-        top_pal=top_pal,
-        reclamos_pendientes=pendientes
-    )
+    return render_template("dashboard_departamento.html", depto=depto_nombre, estadisticas=estadisticas, top_pal=top_pal, reclamos_pendientes=pendientes)
 
 @app.route("/dashboard_departamento/manejar", methods=["POST"])
 def manejar_reclamo():
-    # Sólo jefes de departamento
     if session.get("rol") != "jefe_departamento":
         flash("Acceso no autorizado", "danger")
         return redirect(url_for("index"))
-
     depto_nombre = session["departamento_nombre"]
     reclamo_id   = int(request.form["reclamo_id"])
     nuevo_estado = request.form["nuevo_estado"]
-
     r = gr.obtener_reclamo_por_id(reclamo_id)
     if r.departamento.nombre != depto_nombre: # type: ignore
         flash("No puedes manejar reclamos de otro departamento", "danger")
         return redirect(url_for("dashboard_departamento"))
-
     if gr.cambiar_estado(reclamo_id, nuevo_estado):
         flash("Estado actualizado", "success")
     else:
         flash("Error al actualizar", "danger")
-
     return redirect(url_for("dashboard_departamento"))
 
 @app.route("/dashboard_tecnico")
@@ -149,75 +119,37 @@ def dashboard_tecnico():
     if session.get("rol") != "secretario_tecnico":
         flash("Acceso no autorizado", "danger")
         return redirect(url_for("index"))
-
-    # Obtener datos
     stats    = gr.estadisticas()
     top_pal  = gr.top_palabras(limit=15)
     pendientes = gr.listar_pendientes()
-
-    # Lista de departamentos para el select
     departamentos = gr.listar_departamentos()  # Necesitamos este método
-
-    
-    return render_template(
-        "dashboard_tecnico.html",
-        estadisticas=stats,
-        top_pal=top_pal,
-        reclamos_pendientes=pendientes,
-        departamentos=departamentos
-    )
+    return render_template("dashboard_tecnico.html", estadisticas=stats, top_pal=top_pal, reclamos_pendientes=pendientes, departamentos=departamentos)
 
 @app.route("/dashboard/<int:dept_id>/reporte.html")
 def reporte_departamento(dept_id):
-    # 1) Datos
     depto = gr.base_de_datos.obtener_o_crear_departamento(dept_id)  # tu método
     stats = gr.base_de_datos.estadisticas_por_estado(departamento_id=dept_id)
     reclamos = gr.listar_pendientes(depto.nombre) # type: ignore
-
-    # 2) Render a string
-    html = render_template(
-        "reporte_departamento.html",
-        depto=depto,
-        estadisticas=stats,
-        reclamos=reclamos
-    )
-
-    # 3) Devolver como descarga
+    html = render_template("reporte_departamento.html", depto=depto, estadisticas=stats, reclamos=reclamos)
     filename = f"reporte_{depto.nombre.replace(' ','_')}.html"
-    return Response(
-        html,
-        mimetype="text/html",
-        headers={
-          "Content-Disposition": f"attachment; filename={filename}"
-        }
-    )
+    return Response(html, mimetype="text/html", headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 @app.route("/dashboard/tecnico/reporte.html")
 def reporte_tecnico():
     stats = gr.base_de_datos.estadisticas_por_estado()
-    reclamos = gr.listar_pendientes()  # todos
-    html = render_template(
-        "reporte_departamento.html",   # reutilizamos la misma plantilla
-        depto=type("D", (), {"nombre":"Global"})(),
-        estadisticas=stats,
-        reclamos=reclamos
-    )
-    return Response(
-        html,
-        mimetype="text/html",
-        headers={"Content-Disposition":"attachment; filename=reporte_global.html"}
-    )
+    reclamos = gr.listar_pendientes()  
+    html = render_template("reporte_departamento.html", depto=type("D", (), {"nombre":"Global"})(), estadisticas=stats, reclamos=reclamos)
+    return Response(html, mimetype="text/html", headers={"Content-Disposition":"attachment; filename=reporte_global.html"})
 
 
 @app.route("/dashboard_tecnico/derivar", methods=["POST"])
 def derivar_reclamo():
-    # Sólo secretario técnico
     if session.get("rol") != "secretario_tecnico":
         flash("Acceso no autorizado", "danger")
         return redirect(url_for("index"))
 
-    reclamo_id          = int(request.form.get("reclamo_id")) # type: ignore
-    depto_destino       = request.form.get("departamento_destino")
+    reclamo_id= int(request.form.get("reclamo_id")) # type: ignore
+    depto_destino= request.form.get("departamento_destino")
 
     success = gr.derivar_reclamo(reclamo_id, depto_destino) # type: ignore
     if success:
@@ -227,7 +159,6 @@ def derivar_reclamo():
 
     return redirect(url_for("dashboard_tecnico"))
 
-# Logout
 @app.route("/logout")
 def logout():
     session.clear()
@@ -247,7 +178,6 @@ def mis_reclamos():
 @app.route("/ayuda")
 def ayuda():
     rol = session.get("rol")
-    # Solo roles administrativos pueden ver ayuda de dashboards
     if rol not in ("jefe_departamento", "secretario_tecnico"):
         flash("Acceso no autorizado", "danger")
         return redirect(url_for("index"))
@@ -255,11 +185,8 @@ def ayuda():
 
 @app.route("/dashboard/<int:dept_id>/analitica")
 def analitica_departamento(dept_id):
-    # 1) Obtiene el conteo por estado
     stats = gbd.estadisticas_por_estado(departamento_id=dept_id)
-    # 2) Genera la imagen PNG en Base64
     pie_png = gbd.generar_pie(stats)
-    # 3) Rinde la plantilla pasando pie_png
     return render_template("analitica_depto.html",
                            estadisticas=stats,
                            pie_png=pie_png,
@@ -275,10 +202,8 @@ def analitica_tecnico():
 
 @app.errorhandler(404)
 def pagina_no_encontrada(error):
-    # Renderiza templates/404.html
     return render_template("404.html"), 404
 
 @app.errorhandler(500)
 def error_interno(error):
-    # Renderiza templates/500.html
     return render_template("500.html"), 500

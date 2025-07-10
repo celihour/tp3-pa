@@ -41,12 +41,10 @@
 </body>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    // Para cada formulario, cuando se envíe…
     document.querySelectorAll("form").forEach(form => {
       form.addEventListener("submit", () => {
         const btn = form.querySelector("button[type=submit]");
         if (!btn) return;
-        // Ocultar el texto y mostrar spinner
         const spinner = btn.querySelector(".spinner-border");
         const label   = btn.querySelector(".btn-text");
         btn.disabled = true;           // deshabilitar para evitar dobles clicks
@@ -58,10 +56,8 @@
 </script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    // Auto-dismiss de alerts tras 5s
     setTimeout(() => {
       document.querySelectorAll(".alert").forEach(alertEl => {
-        // Usa la API de bootstrap para cerrar
         const bsAlert = bootstrap.Alert.getOrCreateInstance(alertEl);
         bsAlert.close();
       });

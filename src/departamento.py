@@ -1,10 +1,7 @@
-# src/departamento.py
-
 from typing import List
 from reclamo import Reclamo
 
 class Departamento:
-
     def __init__(self, id_departamento: int, nombre: str):
         self.id_departamento = id_departamento
         self.nombre = nombre

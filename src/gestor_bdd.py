@@ -17,7 +17,6 @@ class GestorBaseDatos:
         self.session = Session()
         Base.metadata.create_all(self.engine)
 
-
     def crear_usuario(self, nombre, apellido, email, username, contraseña, rol):
         usuario = modelos.UsuarioModelo(nombre=nombre, apellido=apellido, email=email, username=username, contraseña=contraseña, rol=rol)
         self.session.add(usuario)
@@ -29,8 +28,7 @@ class GestorBaseDatos:
         return (self.session.query(modelos.UsuarioModelo).filter(modelos.UsuarioModelo.username == username).first())
 
     def obtener_usuario_por_email(self, email):
-        return (
-            self.session.query(modelos.UsuarioModelo).filter(modelos.UsuarioModelo.email == email).first())
+        return (self.session.query(modelos.UsuarioModelo).filter(modelos.UsuarioModelo.email == email).first())
 
     def obtener_o_crear_departamento(self, nombre):
         dept = (self.session.query(modelos.DepartamentoModelo).filter(modelos.DepartamentoModelo.nombre == nombre).first())
@@ -71,23 +69,11 @@ class GestorBaseDatos:
             return True
         return False
 
-    def estadisticas_por_estado(
-            self,
-            departamento_id: Optional[int] = None
-        ) -> dict[str,int]:
-            """
-            Si departamento_id es None, cuenta todos los reclamos;
-            si viene un id, solo los de ese departamento.
-            """
-            query = (
-                self.session
-                    .query(ReclamoModelo.estado, func.count())
-                    .group_by(ReclamoModelo.estado)
-            )
+    def estadisticas_por_estado(self,departamento_id: Optional[int] = None) -> dict[str,int]:
+            query = (self.session.query(ReclamoModelo.estado, func.count()).group_by(ReclamoModelo.estado))
             if departamento_id is not None:
                 query = query.filter(ReclamoModelo.departamento_id == departamento_id)
-
-            filas = query.all()  # List[Tuple[str,int]]
+            filas = query.all()  
             return {estado: cuenta for estado, cuenta in filas}
 
     def top_palabras(self, limit=15):
@@ -105,32 +91,18 @@ class GestorBaseDatos:
         self.session.commit()
         return True
     
-    def generar_pie(self,
-                    estadisticas: dict[str,int],
-                    size: tuple[int,int] = (4,4)
-                   ) -> str:
-        """
-        Genera un pie chart con Matplotlib a partir de un dict
-        Devuelve la imagen codificada en Base64 para incrustar en HTML.
-        """
-        # 1) Prepara datos
+    def generar_pie(self,estadisticas: dict[str,int],size: tuple[int,int] = (4,4)) -> str:
         labels = list(estadisticas.keys())
         counts = list(estadisticas.values())
-
-        # 2) Dibuja con Matplotlib
         fig, ax = plt.subplots(figsize=size)
         ax.pie(counts,
                labels=labels,
                autopct='%1.1f%%',
                startangle=90)
-        ax.axis('equal')  # círculo perfecto
-
-        # 3) Guarda a un buffer en memoria
+        ax.axis('equal')  
         buf = io.BytesIO()
         fig.savefig(buf, format='png', bbox_inches='tight')
         plt.close(fig)
         buf.seek(0)
-
-        # 4) Codifica a Base64
         img_b64 = base64.b64encode(buf.read()).decode('ascii')
         return img_b64

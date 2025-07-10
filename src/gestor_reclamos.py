@@ -6,7 +6,6 @@ from usuario import Usuario
 from departamento import Departamento
 
 class GestorReclamos:
-
     def __init__(self):
         self.base_de_datos= GestorBaseDatos()
 
@@ -43,11 +42,6 @@ class GestorReclamos:
         return self.base_de_datos.estadisticas_por_estado()
     
     def estadisticas_por_departamento(self, nombre_departamento: str) -> dict[str, int]:
-        """
-        Estadísticas de reclamos sólo de un departamento:
-        {'pendiente': N1, 'en_proceso': N2, …}
-        """
-        # Primero obtén el objeto Departamento para sacar su id
         dept = self.base_de_datos.obtener_o_crear_departamento(nombre_departamento)
         return self.base_de_datos.estadisticas_por_estado(departamento_id=dept.id) # type: ignore
 
@@ -59,10 +53,6 @@ class GestorReclamos:
         return [Departamento(id=m.id, nombre=m.nombre) for m in modelos] # type: ignore
 
     def derivar_reclamo(self, reclamo_id: int, nombre_departamento: str) -> bool:
-        """
-        Cambia el departamento de un reclamo al indicado.
-        """
-        # Obtener o crear el departamento destino
         depto = self.base_de_datos.obtener_o_crear_departamento(nombre_departamento)
         return self.base_de_datos.cambiar_departamento(reclamo_id, depto.id) # type: ignore
     
